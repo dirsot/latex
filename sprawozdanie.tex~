@@ -1,0 +1,193 @@
+\documentclass{sprawozdanie-agh}
+
+\usepackage[utf8]{inputenc}
+\usepackage{listings}
+
+\makeatletter
+
+\begin{document}
+
+\przedmiot{Przetwarzanie Sygnałów w Systemach Diagnostyki Medycznej}
+\tytul{Laboratorium 1}
+\podtytul{Przetwarzanie i analiza sygnału elektrokardiograficznego EKG }
+\kierunek{Informatyka Stosowana}
+\autor{Agata Sitnik, Łukasz Zieńkowski}
+\data{Kraków, 15 kwietnia  2012}
+
+\stronatytulowa{}
+
+\section{Cel zajęć}
+
+Celem laboratorium była analiza sygnału EKG trzech osób w różnym wieku i detekcja zespołów QRS. Przy pomocy różnych transformacji należało
+przykształcić oryginalny sygnał w taki sposób aby wznocnić szukane zespoły a pozostały sygnał zminimalizować.
+
+\section{Metoda detekcji załamków R oraz Q i S}
+
+Detekcja załamków została wykonana przy wykorzystaniu algorytmu Pan-Tompkins, jego kolejne etapy to:
+
+\begin{enumerate}
+\item \texttt{Filtracja pasmowoprzepustowa}
+
+Wykorzystane filtry zostały stworzone przy użyciu narzędzia fdatool a nastepnie wyeksportowane, aby móc wykorzystać otrzymane zmienne w 
+metodzie \emph{filter(a,b,signal)} należy przekonwersować je do współczynników wielomianów transmitancji filtrów przy użyciu metody
+\emph{[b,a] = sos2tf(sos,g)}. 
+
+Ustawienia które były wspólne to: 
+
+~~Design Method IIR - Butterworth,
+
+~~częstotliwość(Fs) - 360 Hz
+
+\texttt{a)Filtr dolnoprzepustowy}
+
+W celu jak najlepszego wytłumienia częstotliwości większych niż 15 Hz nie powodując znacznych zniekształceń na interesującym nas zakresie 
+wartość odcięcia Fc została ustawiona na 17 Hz,rząd 12 
+
+
+Poniżej znajduje się fragment kodu wykonujący filtrację, po wykonaniu splotu sygnału z filtrem zostało usunięte opóźnienie.
+
+\begin{verbatim}
+LP_f=filter(G,SOS,[1 zeros(1,12)]); 
+x2 = conv (x1 ,LP_f);
+x2 = x2 (6+[1: N]);
+\end{verbatim}
+
+Charakterystyka fazowa i częstotliwościowa stworzona przy pomocy funkcji \emph{freqz} przedstawiona jest poniżej.
+
+\includegraphics[width=150mm]{low.jpg}
+
+Jego parametry to odpowiednio:
+
+~~a = [1 -9.7272 43.5483 -118.6275 218.9436 -288.3816 277.9134 -197.4117 102.5694 -38.0102 9.5353 -1.4537 0.1019]
+
+~~b = 1.0e-007 *[0.0004 0.0048 0.0262 0.0872 0.1961 0.3138 0.3661 0.3138 0.1961 0.0872 0.0262 0.0048 0.0004]
+
+\texttt{a)Filtr górnoprzepustowy}
+
+Podobnie jak w poprzednim przypadku aby interesujący nas zakres częstotliwości był jak najlepszy, wartość odcięcia Fc ustawiono na 5 Hz, 
+rząd równy 32
+
+Poniżej obie charakterystyki
+
+\includegraphics[width=150mm]{high.jpg}
+
+Jego parametry to odpowiednio:
+
+~~a = 1.0e+008 * [0 0 0 0 0.0003 -0.0015 0.0064 -0.0226 0.0668 -0.1683 0.3659 -0.6918 1.1448 -1.6654 2.1374 -2.4258 2.4380 -2.1706 1.7113 -1.1931 0.7338 -0.3968 0.1878 -0.0773 0.0274 -0.0083 0.0021 -0.0004 0.0001 0 0 0 0]
+
+~~b = 1.0e-008 *[0 0 0 0 0.0001 -0.0008 0.0037 -0.0138 0.0432 -0.1152 0.2650 -0.5300 0.9276 -1.4270 1.9367 -2.3241 2.4693 -2.3241 1.9367 -1.4270 0.9276 -0.5300 0.2650 -0.1152 0.0432 -0.0138 0.0037 -0.0008 0.0001 0 0 0 0]
+
+
+\item \texttt{Różniczkowanie sygnału}
+
+W wyniku powyższych czynności otrzymaliśmy sygnał w którym częstotliwości z poza zakresu zainteresowania, zakłócenia 
+zostały stłumione.
+
+Następnym krokiem jest wykorzystanie różniczkowania do wytłumienia niskoczęstotliwościowych komponetów i 
+wzmocnienie wysokoczęstotliwościowych, w wyniku załamki P i T zostają stłumione, a poszukiwane zespoły QRS wzmocnione.
+
+\begin{verbatim}
+h = [-1 -2 0 2 1]/8;
+x4 = conv (x3 ,h);
+x4 = x4 (2+[1: N]);
+\end{verbatim}
+
+\item \texttt{Potęgowanie sygnału}
+
+W celu dodakowych wzmocnien sygnał ulega spotęgowaniu.
+
+\item \texttt{Całkowanie sygnału}
+
+Kolejnym krokiem jest całkowanie sygnału, celem tej akcji jest stworzenie gładkiej lini, zabieg ten ułatwi wykrycie zespołu R.
+Szerokość okna do tej akcji została ustalona na  wartość 16.
+
+\begin{verbatim}
+x6 = conv (x5 ,h);
+x6 = x6 (16+[1: N]);
+
+max_h = max(x6);
+thresh = mean (x6 );
+poss_reg =(x6>thresh*max_h);
+\end{verbatim}
+
+\item \texttt{Progowanie i wyznaczanie załamków}
+
+Do wyznaczenia załamków QRS zastosowano poniższy algorytm.Po wyznaczeniu kandydatów na początki i końce zespołów QRS usuwane jest opóźnienie.
+Ponieważ załamek R jest najbardziej charakterystyczny, on jako pierwszy zostaje wykryty poprze wykrycie maksimum w oknie, następnie szukane 
+są minima lokalne po obu stronach zespołu R.
+
+\begin{verbatim}
+left = find(diff([0 poss_reg])==1);
+right = find(diff([poss_reg 0])==-1);
+
+for i=1:length(left)
+
+    [R_var(i) R(i)] = max( x1(left(i):right(i)) );
+    R(i) = R(i)-1+left(i);
+
+    [Q_var(i) Q(i)] = min( x1(left(i):R(i)) );
+    Q(i) = Q(i)-1+left(i); 
+
+    [S_var(i) S(i)] = min( x1(R(i):right(i)) );
+    S(i) = S(i)-1+left(i); 
+
+end
+\end{verbatim}
+
+Na koniec dane zostały prezentowane
+
+\begin{verbatim}
+figure(1)
+title('Sygnal EKG, zalamki QRS');
+plot (t,x1/max(x1) , t(R_loc) ,R_value , 'r^', t(S_loc) ,S_value, '*',t(Q_loc) , Q_value, 'o');
+legend('ECG','R','S','Q');
+
+\end{verbatim}
+
+\end{enumerate}
+
+
+\section{Pozytywne wyniki detekcji}
+
+Poniżej znajdują się wyniki detekcji zespołów QRS, w każdym przypadku na wyższym wykresie widoczne jest zakres czasowy 0-10 sekundy, 
+poniżej wykres w przedziale 1-3 sekundy.  
+\newline Rekord 100, mężczyzna, 69 lat
+
+\includegraphics[width=150mm]{100_ok.jpg}
+
+Rekord 102, kobieta, 84 lata
+
+\includegraphics[width=150mm]{102.jpg}
+
+Rekord 228 kobieta, 80 lat
+
+\includegraphics[width=150mm]{228_ok.jpg}
+
+\section{Błędne wyniki detekcji}
+
+Rekord 100, mężczyzna, 69 lat
+
+Wynik detekcji załamków w przypadku ominięcia filtracji sygnału, eliminacji zakłóceń.
+
+\includegraphics[width=150mm]{100_filtr.jpg}
+
+Rekord 102, kobieta, 84 lata
+
+Wynik błędnej metody detekcji załamków.
+
+\includegraphics[width=150mm]{102_blad.jpg}
+
+Rekord 228 kobieta, 80 lat
+\newlineWynik błędnej metody detekcji załamków.
+
+\includegraphics[width=150mm]{228_blad.jpg}
+
+
+
+\section{Wnioski}
+
+Poprawna filtracja sygnału wejściowego na znaczący wpływ na powodzenie wykrycia załamków.
+\newline 
+Rozpoznawanie załamków QRS należy rozpocząć od załamka R który jest najbajdziej charakterystyczny i najłatwiejszy do odnalezienia.
+
+\end{document}

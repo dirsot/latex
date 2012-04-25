@@ -1,0 +1,176 @@
+#% Do not delete the line below; configure depends on this
+#  \DeclareLaTeXClass[sprawozdanie-agh]{AGH (Sprawozdanie)}
+
+# Read the definitions from article.layout
+Input article.layout
+# Input general definitions
+Input stdclass.inc
+
+Format 11
+Columns                 1
+Sides                   1
+PageStyle               Plain
+
+Preamble
+%\newenvironment{przedmiot}{
+%	\it                          % Italic font
+%}
+EndPreamble
+
+Style Przedmiot
+	LatexType       Command
+	LatexName       przedmiot
+	Align           Center
+	LeftMargin		"MMMMM"        # Left margin width of 5 'M's in LyX
+	RightMargin		"MMMMM"        # Right margin width of 5 'M's in LyX
+	ParSkip			0.7            # Paragraph skip .7in in LyX
+	ParSep			0.7            # Paragraph separation .7in in LyX
+	TopSep			0.7            # Page top separation .7in in LyX
+	BottomSep		0.7            # Page top separation .7in in LyX
+	
+	Font
+	  Series              Bold
+	  Size                Largest
+	EndFont
+End
+
+Style Tytul
+	LatexType       Command
+	LatexName       tytul
+	Align           Center
+	LeftMargin		"MMMMM"        # Left margin width of 5 'M's in LyX
+	RightMargin		"MMMMM"        # Right margin width of 5 'M's in LyX
+	ParSkip			0.7            # Paragraph skip .7in in LyX
+	ParSep			0.7            # Paragraph separation .7in in LyX
+	TopSep			0.7            # Page top separation .7in in LyX
+	BottomSep		0.7            # Page top separation .7in in LyX
+	
+	Font
+	  Series              Bold
+	  Size                Larger
+	EndFont
+End
+
+Style Podtytul
+	LatexType       Command
+	LatexName       podtytul
+	Align           Center
+	LeftMargin		"MMMMM"        # Left margin width of 5 'M's in LyX
+	RightMargin		"MMMMM"        # Right margin width of 5 'M's in LyX
+	ParSkip			0.7            # Paragraph skip .7in in LyX
+	ParSep			0.7            # Paragraph separation .7in in LyX
+	TopSep			0.0            # Page top separation .7in in LyX
+	BottomSep		0.7            # Page top separation .7in in LyX
+	
+	Font
+	  Series              Bold
+	  Size                Large
+	EndFont
+End
+
+Style Kierunek
+	LatexType       Command
+	LatexName       kierunek
+	Align           Center
+	LeftMargin		"MMMMM"        # Left margin width of 5 'M's in LyX
+	RightMargin		"MMMMM"        # Right margin width of 5 'M's in LyX
+	ParSkip			0.7            # Paragraph skip .7in in LyX
+	ParSep			0.7            # Paragraph separation .7in in LyX
+	TopSep			0.3            # Page top separation .7in in LyX
+	BottomSep		0.3            # Page top separation .7in in LyX
+	
+	Font
+		Family		Typewriter
+	  Series              Bold
+	  Size                Large
+	EndFont
+End
+
+Style Autor
+	LatexType       Command
+	LatexName       autor
+	Align           Center
+	LeftMargin		"MMMMM"        # Left margin width of 5 'M's in LyX
+	RightMargin		"MMMMM"        # Right margin width of 5 'M's in LyX
+	ParSkip			0.7            # Paragraph skip .7in in LyX
+	ParSep			0.7            # Paragraph separation .7in in LyX
+	TopSep			0.3            # Page top separation .7in in LyX
+	BottomSep		0.3            # Page top separation .7in in LyX
+	
+	Font
+	  Series              Medium
+	  Size                Normal
+	EndFont
+End
+Style Autorr
+	LatexType       Command
+	LatexName       autor
+	Align           Center
+	LeftMargin		"MMMMM"        # Left margin width of 5 'M's in LyX
+	RightMargin		"MMMMM"        # Right margin width of 5 'M's in LyX
+	ParSkip			0.7            # Paragraph skip .7in in LyX
+	ParSep			0.7            # Paragraph separation .7in in LyX
+	TopSep			0.3            # Page top separation .7in in LyX
+	BottomSep		0.3            # Page top separation .7in in LyX
+	
+	Font
+	  Series              Medium
+	  Size                Normal
+	EndFont
+End
+
+Style Email
+	LatexType       Command
+	LatexName       email
+	Align           Center
+	LeftMargin		"MMMMM"        # Left margin width of 5 'M's in LyX
+	RightMargin		"MMMMM"        # Right margin width of 5 'M's in LyX
+	ParSkip			0.7            # Paragraph skip .7in in LyX
+	ParSep			0.7            # Paragraph separation .7in in LyX
+	TopSep			0.3            # Page top separation .7in in LyX
+	BottomSep		0.3            # Page top separation .7in in LyX
+	
+	Font
+		Shape	Italic
+	  Series              Medium
+	  Size                Normal
+	EndFont
+End
+
+Style Data
+	LatexType       Command
+	LatexName       data
+	Align           Center
+	LeftMargin		"MMMMM"        # Left margin width of 5 'M's in LyX
+	RightMargin		"MMMMM"        # Right margin width of 5 'M's in LyX
+	ParSkip			0.7            # Paragraph skip .7in in LyX
+	ParSep			0.7            # Paragraph separation .7in in LyX
+	TopSep			0.7            # Page top separation .7in in LyX
+	BottomSep		0.7            # Page top separation .7in in LyX
+	
+	Font
+	  Series              Medium
+	  Size                Normal
+	EndFont
+End
+
+Style Strona
+	LatexType        Command
+	LatexName        stronatytulowa
+	ParSkip          0
+	Align            Center
+	Margin           First_Dynamic
+	TopSep           0
+	BottomSep        3
+	ParSep           0
+	LabelType        Static
+	LabelBottomSep   0
+	LabelString      "--- Strona tytulowa ---"
+	KeepEmpty        1
+
+	LabelFont 
+		Series       Medium
+		Size         Normal
+		Color        latex
+	EndFont
+End
